@@ -1,12 +1,9 @@
-extends ../layout.pug
-
-block content
-    div(class="d-flex flex-row content mx-auto")
-        div(class="profile-container")
-            include ../includes/profile.pug
-        div(class="flex-fill d-flex flex-column")
-            if tweets 
-                each tweet in tweets 
-                    div(class="card")
-                        div(class="card-body")= tweet.content
-
+if tweets && tweets.length
+    each tweet in tweets 
+        div(class="card tweet-element")
+            div(class="card-body")
+                div(class="card-text")= tweet.content
+                a(href="/tweets/edit/" + tweet._id class="btn btn-secondary mr-2") Edit
+            button(class="btn btn-danger float-right" tweetid=tweet._id) X
+else 
+    div Aucun tweet.
