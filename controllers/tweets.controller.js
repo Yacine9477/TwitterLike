@@ -5,7 +5,7 @@ const { getTweets, createTweet, deleteTweet, getTweet, updateTweet } = require('
 exports.tweetList = async (req, res, next) => {
     try {
         const tweets = await getTweets();
-        res.render('tweets/tweet', { tweets});
+        res.render('tweets/tweet', { tweets, isAuthenticated: req.isAuthenticated(), currentUser: req.user });
 
     } catch(e) {
         console.log(e);
@@ -14,17 +14,17 @@ exports.tweetList = async (req, res, next) => {
 }
 
 exports.tweetNew = (req, res, next) => {
-    res.render('tweets/tweet-form', { tweet: {} });
+    res.render('tweets/tweet-form', { tweet: {}, isAuthenticated: req.isAuthenticated(), currentUser: req.user });
 }
 
 exports.tweetCreate = async (req, res, next) => {
     try {
-         const body = req.body;              //body contient toutes les informations envoyées 
-         await createTweet(body);             // par le client lors de l’appel à l’API /tweets en POST
+         const body = req.body;              //body contient toutes les informations envoyées par le client lors de l’appel à l’API /tweets en POST
+         await createTweet({ ...body, author: req.user._id });      // On décoonstruit body pour que ce qu'il contient soit au même niveau que author
          res.redirect('/tweets');
     } catch(e) {
         const errors = Object.keys(e.errors).map(key => e.errors[key].message);
-        res.status(400).render('tweets/tweet-form', {errors});
+        res.status(400).render('tweets/tweet-form', {errors, isAuthenticated: req.isAuthenticated(), currentUser: req.user});
     }
 }
 
@@ -43,7 +43,7 @@ exports.tweetEdit = async (req, res, next) => {
     try {
         const tweetId = req.params.tweetId; //on récupère l'id du tweet
         const tweet = await getTweet(tweetId);
-        res.render('tweets/tweet-form', { tweet});
+        res.render('tweets/tweet-form', { tweet, isAuthenticated: req.isAuthenticated(), currentUser: req.user });
     } catch(e) {
         next(e)
     }
@@ -59,6 +59,6 @@ exports.tweetUpdate = async (req, res, next) => {
     } catch(e) {
         const errors = Object.keys(e.errors).map(key => e.errors[key].message);
         const tweet = await getTweet(tweetId);
-        res.status(400).render('tweets/tweet-form', {errors, tweet});
+        res.status(400).render('tweets/tweet-form', {errors, tweet, isAuthenticated: req.isAuthenticated(), currentUser: req.user });
     }
 }
